@@ -1,25 +1,99 @@
-import asnV4Data from '../data/asn/asn-v4.js';
-import asnV6Data from '../data/asn/asn-v6.js';
-import metadataData from '../data/asn/asn-metadata.js';
+type RipeStatResponse<T> = {
+    status: string;
+    message?: string;
+    data: T;
+};
 
-import { CidrDatabase, CidrMetadata } from '../data/db.js';
-import { decodeB64, ungzip } from '../data/compressor.js';
-import { getIpType } from '../utils/type.js';
+type NetworkInfo = {
+    prefix?: string | null;
+    asns?: (number | string)[];
+};
 
-async function loadDatabase(data: string): Promise<Uint8Array> {
-    return ungzip(decodeB64(data));
+type AsBlock = {
+    resource: string;
+    desc: string;
+    name: string;
+};
+
+type AsOverview = {
+    holder?: string | null;
+    announced?: boolean;
+    block?: AsBlock | null;
+};
+
+export type AsnMetadata = {
+    asn: number;
+    holder: string | null;
+    announced: boolean;
+    block: AsBlock | null;
+};
+
+export type AsnLookup = {
+    ip: string;
+    prefix: string | null;
+    asn: AsnMetadata | null;
+    asns: AsnMetadata[];
+};
+
+async function fetchRipeStat<T>(url: URL, errorMessage: string): Promise<T> {
+    const response = await fetch(url);
+
+    if (!response.ok) {
+        throw new Error(`${errorMessage}: HTTP ${response.status}`);
+    }
+
+    const payload = (await response.json()) as RipeStatResponse<T>;
+
+    if (payload.status !== 'ok') {
+        throw new Error(payload.message ?? errorMessage);
+    }
+
+    return payload.data;
 }
 
-const [dbV4, dbV6, metadata] = await Promise.all([
-    loadDatabase(asnV4Data).then((data) => CidrDatabase.from(data)),
-    loadDatabase(asnV6Data).then((data) => CidrDatabase.from(data)),
-    loadDatabase(metadataData).then((data) => CidrMetadata.from(data)),
-]);
+export async function lookupAsn(ip: string): Promise<AsnLookup> {
+    const networkUrl = new URL(
+        'https://stat.ripe.net/data/network-info/data.json',
+    );
 
-export function lookupAsn(ip: string) {
-    const type = getIpType(ip);
+    networkUrl.searchParams.set('resource', ip);
 
-    const database = type === 'ipv4' ? dbV4 : dbV6;
+    const network = await fetchRipeStat<NetworkInfo>(
+        networkUrl,
+        'RIPEstat network lookup failed',
+    );
+    const metadata = await Promise.all(
+        (network.asns ?? []).map(async (asn): Promise<AsnMetadata> => {
+            const numericAsn = Number(asn);
 
-    return database.lookupWithMetadata(ip, metadata);
+            if (!Number.isSafeInteger(numericAsn)) {
+                throw new Error(`Invalid ASN returned by RIPEstat: ${asn}`);
+            }
+
+            const asUrl = new URL(
+                'https://stat.ripe.net/data/as-overview/data.json',
+            );
+
+            asUrl.searchParams.set('resource', `AS${numericAsn}`);
+
+            const overview = await fetchRipeStat<AsOverview>(
+                asUrl,
+                `RIPEstat ASN lookup failed for AS${numericAsn}`,
+            );
+
+            return {
+                asn: numericAsn,
+                holder: overview.holder ?? null,
+                announced: overview.announced ?? false,
+                block: overview.block ?? null,
+            };
+        }),
+    );
+
+    return {
+        ip,
+        prefix: network.prefix ?? null,
+        asn: metadata[0] ?? null,
+        asns: metadata,
+    };
 }

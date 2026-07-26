@@ -16,21 +16,6 @@
             "types": "./dist/index.d.ts",
             "import": "./dist/index.js",
             "default": "./dist/index.js"
-        },
-        "./data/asn-v4": {
-            "types": "./dist/data/asn/asn-v4.d.ts",
-            "import": "./dist/data/asn/asn-v4.js",
-            "default": "./dist/data/asn/asn-v4.js"
-        },
-        "./data/asn-v6": {
-            "types": "./dist/data/asn/asn-v6.d.ts",
-            "import": "./dist/data/asn/asn-v6.js",
-            "default": "./dist/data/asn/asn-v6.js"
-        },
-        "./data/asn-metadata": {
-            "types": "./dist/data/asn/asn-metadata.d.ts",
-            "import": "./dist/data/asn/asn-metadata.js",
-            "default": "./dist/data/asn/asn-metadata.js"
         }
     },
     "files": [
@@ -40,6 +25,7 @@
     ],
     "scripts": {
         "build": "tsc -p tsconfig.json",
+        "data:vpn": "node scripts/download-vpn-info.ts",
         "clean": "rm -rf dist",
         "lint": "eslint .",
         "format": "prettier --write .",
