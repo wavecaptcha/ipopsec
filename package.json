@@ -1,0 +1,62 @@
+{
+    "name": "@wavecaptcha/ipopsec",
+    "version": "0.1.0",
+    "description": "IP address information and reputation utilities.",
+    "license": "GPL-3.0-or-later",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/wavecaptcha/ipopsec.git"
+    },
+    "type": "module",
+    "main": "./dist/index.js",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js",
+            "default": "./dist/index.js"
+        },
+        "./data/asn-v4": {
+            "types": "./dist/data/asn/asn-v4.d.ts",
+            "import": "./dist/data/asn/asn-v4.js",
+            "default": "./dist/data/asn/asn-v4.js"
+        },
+        "./data/asn-v6": {
+            "types": "./dist/data/asn/asn-v6.d.ts",
+            "import": "./dist/data/asn/asn-v6.js",
+            "default": "./dist/data/asn/asn-v6.js"
+        },
+        "./data/asn-metadata": {
+            "types": "./dist/data/asn/asn-metadata.d.ts",
+            "import": "./dist/data/asn/asn-metadata.js",
+            "default": "./dist/data/asn/asn-metadata.js"
+        }
+    },
+    "files": [
+        "dist",
+        "README.md",
+        "LICENSE"
+    ],
+    "scripts": {
+        "build": "tsc -p tsconfig.json",
+        "clean": "rm -rf dist",
+        "lint": "eslint .",
+        "format": "prettier --write .",
+        "format:check": "prettier --check .",
+        "verify": "npm run clean && npm run build && npm run lint && npm run format:check",
+        "package:dry-run": "npm run verify && npm pack --dry-run",
+        "package:publish": "npm run verify && npm publish --access public"
+    },
+    "engines": {
+        "node": ">=20"
+    },
+    "devDependencies": {
+        "@eslint/js": "^9.22.0",
+        "@types/node": "^22.13.10",
+        "eslint": "^9.22.0",
+        "prettier": "^3.5.3",
+        "typescript": "^5.8.2",
+        "typescript-eslint": "^8.26.0"
+    }
+}
