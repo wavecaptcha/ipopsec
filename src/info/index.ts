@@ -16,7 +16,6 @@ export async function getInfo(ip: string): Promise<{
         tor: TorLookup['metadata'] | null;
         vpn: { providers: string[] } | null;
     };
-    vpn: VpnLookup;
 }> {
     const type = getIpType(ip);
 
@@ -37,6 +36,5 @@ export async function getInfo(ip: string): Promise<{
         categories,
         metadata: { tor: tor?.metadata, vpn: { providers: vpn?.providers } },
         asn,
-        vpn,
     };
 }
