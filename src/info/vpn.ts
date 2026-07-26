@@ -8,7 +8,7 @@ import {
 } from '../utils/cidr/index.js';
 
 const VPN_DATA_URL =
-    'https://raw.githubusercontent.com/wavecaptcha/ipopsec/data/data/vpn.csv';
+    'https://raw.githubusercontent.com/wavecaptcha/ipopsec/data/data/vpn.csv.gz';
 
 export type VpnLookup = {
     ip: string;
@@ -55,8 +55,14 @@ async function loadVpnIndex(): Promise<VpnIndex> {
         throw new Error(`VPN data lookup failed: HTTP ${response.status}`);
     }
 
+    const compressed = await response.arrayBuffer();
+    const decompressed = new Response(
+        new Response(compressed).body!.pipeThrough(
+            new DecompressionStream('gzip'),
+        ),
+    );
     const index: VpnIndex = new Map();
-    const text = await response.text();
+    const text = await decompressed.text();
     const lines = text.split(/\r?\n/);
 
     for (const line of lines.slice(1)) {

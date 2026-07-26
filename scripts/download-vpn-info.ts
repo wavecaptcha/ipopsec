@@ -3,10 +3,13 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { isIP } from 'node:net';
+import { gzip as gzipBuffer } from 'node:zlib';
+import { promisify } from 'node:util';
 
 const FEEDS_URL =
     'https://raw.githubusercontent.com/tn3w/IPBlocklist/refs/heads/master/feeds.json';
-const OUTPUT_PATH = path.resolve('data/vpn.csv');
+const OUTPUT_PATH = path.resolve('data/vpn.csv.gz');
+const gzip = promisify(gzipBuffer);
 
 type Feed = {
     name: string;
@@ -131,7 +134,7 @@ async function main(): Promise<void> {
     ].join('\n');
 
     await fs.mkdir(path.dirname(OUTPUT_PATH), { recursive: true });
-    await fs.writeFile(OUTPUT_PATH, csv);
+    await fs.writeFile(OUTPUT_PATH, await gzip(Buffer.from(csv)));
     console.error(
         `Saved ${uniqueRows.size.toLocaleString('en-US')} VPN CIDRs to ${OUTPUT_PATH}`,
     );
