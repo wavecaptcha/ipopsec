@@ -29,7 +29,11 @@ export async function getInfo(ip: string): Promise<{
     const hostname = await getHostname(ip);
     const location = { country: null, city: null };
 
-    const categories = { tor: tor.isTor, vpn: vpn.isVpn, hosting: false };
+    const categories = {
+        tor: tor.isTor,
+        vpn: vpn.isVpn,
+        hosting: asn.asn?.type === 'Hosting',
+    };
 
     return {
         hostname,
