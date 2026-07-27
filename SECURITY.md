@@ -1,11 +1,5 @@
 # Security Policy
 
-## Supported Versions
-
-| Version | Supported          |
-| ------- | ------------------ |
-| 0.1.x   | :white_check_mark: |
-
 ## Reporting a Vulnerability
 
 If you discover a security vulnerability in this project, please report it responsibly.
@@ -21,6 +15,12 @@ Email security reports to the maintainers listed in the repository. Include:
 - Affected versions
 - The potential impact
 - Any suggested fix (if applicable)
+
+### Out of scope reports:
+
+- Automated ai slop reports ARE NOT allowed.
+- AI may be used to find reports, but DO NOT submit reports if not tested, and verified that they are real.
+- Reports with no reproducible steps 
 
 ### What to Expect
 
@@ -41,4 +41,4 @@ We support responsible disclosure and will not take legal action against researc
 - Make a good faith effort to avoid privacy violations, data destruction, or service disruption
 - Only interact with accounts you own or with explicit permission of the account holder
 - Do not exploit a vulnerability beyond what is necessary to confirm its existence
-- Provide us with reasonable time to resolve the issue before public disclosure
+- Provide us with reasonable time to resolve the issue before public disclosure (We'll let you know when you can publicly disclose the issue)
