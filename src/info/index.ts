@@ -37,7 +37,7 @@ export async function getInfo(ip: string): Promise<InfoLookup> {
         categories: {
             tor: tor.isTor,
             vpn: vpn.isVpn,
-            hosting: asn.asn?.type === 'Hosting',
+            hosting: asn.asns.some((metadata) => metadata.type === 'Hosting'),
         },
         metadata: {
             tor: tor.metadata,

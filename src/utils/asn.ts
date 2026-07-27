@@ -1,5 +1,10 @@
 export type AsnType = 'ISP' | 'Business' | 'Hosting' | 'Unknown';
 
+const ASN_DATA_URL =
+    'https://raw.githubusercontent.com/wavecaptcha/ipopsec/data/data/asn.csv.gz';
+const ASN_TYPES = new Set<AsnType>(['ISP', 'Business', 'Hosting', 'Unknown']);
+let asnTypesPromise: Promise<Map<number, AsnType>> | undefined;
+
 const ASN_TYPE_TERMS: Record<AsnType, string[]> = {
     Unknown: [],
     Hosting: [
@@ -77,6 +82,7 @@ const ASN_TYPE_TERMS: Record<AsnType, string[]> = {
         'global layer',
         'global switch',
         'google cloud',
+        'google llc',
         'greencloud',
         'greenhost',
         'gtt communications',
@@ -106,6 +112,7 @@ const ASN_TYPE_TERMS: Record<AsnType, string[]> = {
         'interserver',
         'iomart',
         'ionos',
+        'keminet',
         'leaseweb',
         'lightedge',
         'lightnode',
@@ -145,7 +152,6 @@ const ASN_TYPE_TERMS: Record<AsnType, string[]> = {
         'redstation',
         'reg.ru',
         'reliablesite',
-        'render',
         'retn',
         'servercentral',
         'serverion',
@@ -170,7 +176,6 @@ const ASN_TYPE_TERMS: Record<AsnType, string[]> = {
         'upcloud',
         'velia.net',
         'vercel',
-        'vps',
         'vultr',
         'webair',
         'webnx',
@@ -181,30 +186,6 @@ const ASN_TYPE_TERMS: Record<AsnType, string[]> = {
         'yandex cloud',
         'zenlayer',
         'zscaler',
-        'bare metal',
-        'baremetal',
-        'cdn',
-        'cloud computing',
-        'cloud hosting',
-        'cloud infrastructure',
-        'cloud services',
-        'cloud solutions',
-        'colocation',
-        'content delivery',
-        'data center',
-        'data centre',
-        'datacenter',
-        'datacentre',
-        'dedicated hosting',
-        'dedicated server',
-        'hosting provider',
-        'hosting services',
-        'infrastructure as a service',
-        'internet data center',
-        'internet data centre',
-        'server hosting',
-        'virtual private server',
-        'web hosting',
     ],
     ISP: [
         '1&1 versatel',
@@ -295,7 +276,6 @@ const ASN_TYPE_TERMS: Record<AsnType, string[]> = {
         'open fiber',
         'optimum',
         'optus',
-        'orange',
         'orange belgium',
         'orange france',
         'orange maroc',
@@ -320,7 +300,6 @@ const ASN_TYPE_TERMS: Record<AsnType, string[]> = {
         'sky uk',
         'softbank',
         'spark new zealand',
-        'spectrum',
         'sprint',
         'starhub',
         'stc',
@@ -369,50 +348,8 @@ const ASN_TYPE_TERMS: Record<AsnType, string[]> = {
         'xfinity',
         'zain',
         'ziggo',
-        'broadband',
-        'cable internet',
-        'fiber broadband',
-        'fibre broadband',
-        'fixed wireless',
-        'internet provider',
-        'internet service provider',
-        'mobile communications',
-        'mobile network',
-        'mobile operator',
-        'telecommunication company',
-        'telecommunications',
-        'telecomunicaciones',
-        'telecomunicacoes',
-        'wireless broadband',
-        'wireless communications',
     ],
-    Business: [
-        'academy',
-        'airport',
-        'airline',
-        'automotive',
-        'bank',
-        'college',
-        'credit union',
-        'education',
-        'financial',
-        'government',
-        'hospital',
-        'insurance',
-        'laboratory',
-        'manufacturing',
-        'ministry',
-        'municipality',
-        'pharmaceutical',
-        'railroad',
-        'railway',
-        'research institute',
-        'retail',
-        'school',
-        'university',
-        'universidad',
-        'universite',
-    ],
+    Business: [],
 };
 
 function normalizeAsnHolder(holder: string): string {
@@ -439,4 +376,41 @@ export function getAsnType(holder: string | null | undefined): AsnType {
     }
 
     return 'Unknown';
+}
+
+async function loadAsnTypes(): Promise<Map<number, AsnType>> {
+    const response = await fetch(ASN_DATA_URL);
+    if (!response.ok) {
+        throw new Error(
+            `ASN classification data lookup failed: HTTP ${response.status}`,
+        );
+    }
+
+    const decompressed = new Response(
+        response.body!.pipeThrough(new DecompressionStream('gzip')),
+    );
+    const types = new Map<number, AsnType>();
+    const lines = (await decompressed.text()).split(/\r?\n/);
+    for (const line of lines.slice(1)) {
+        const [asnText, type] = line.split(',', 3);
+        const asn = Number(asnText);
+        if (Number.isSafeInteger(asn) && ASN_TYPES.has(type as AsnType)) {
+            types.set(asn, type as AsnType);
+        }
+    }
+    return types;
+}
+
+export async function classifyAsn(
+    asn: number,
+    holder?: string | null,
+): Promise<AsnType> {
+    const fallback = getAsnType(holder);
+    try {
+        asnTypesPromise ??= loadAsnTypes();
+        const classified = (await asnTypesPromise).get(asn);
+        return classified && classified !== 'Unknown' ? classified : fallback;
+    } catch {
+        return fallback;
+    }
 }

@@ -25,6 +25,8 @@
     ],
     "scripts": {
         "build": "tsc -p tsconfig.json",
+        "data:asn:classify": "node scripts/train-asn-classifier.ts",
+        "data:asn:features": "node scripts/build-asn-features.ts",
         "data:vpn": "node scripts/download-vpn-info.ts",
         "clean": "rm -rf dist",
         "lint": "eslint .",

@@ -1,4 +1,4 @@
-import { getAsnType } from '../utils/asn.js';
+import { classifyAsn } from '../utils/asn.js';
 import type { AsnType } from '../utils/asn.js';
 
 type RipeStatResponse<T> = {
@@ -87,7 +87,7 @@ export async function lookupAsn(ip: string): Promise<AsnLookup> {
 
             return {
                 asn: numericAsn,
-                type: getAsnType(overview.holder),
+                type: await classifyAsn(numericAsn, overview.holder),
                 holder: overview.holder ?? null,
                 announced: overview.announced ?? false,
                 block: overview.block ?? null,

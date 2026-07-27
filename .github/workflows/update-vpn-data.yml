@@ -1,4 +1,4 @@
-name: Update VPN Data
+name: Update Data
 
 on:
     schedule:
@@ -32,11 +32,33 @@ jobs:
               working-directory: data-branch
               run: node ../source/scripts/download-vpn-info.ts
 
+            - name: Download ASN sources
+              working-directory: source
+              run: node scripts/download-asn-sources.ts --output ../asn-sources
+
+            - name: Build ASN features
+              working-directory: source
+              run: |
+                  node scripts/build-asn-features.ts \
+                    --ris ../asn-sources/riswhoisdump.IPv4.gz \
+                    --as-org ../asn-sources/as-org2info.txt.gz \
+                    --as-rel ../asn-sources/as-rel.txt.bz2 \
+                    --output ../asn-sources/asn-features.csv
+
+            - name: Generate ASN classifications
+              working-directory: source
+              run: |
+                  node scripts/train-asn-classifier.ts \
+                    --input ../asn-sources/asn-features.csv \
+                    --labels training/asn-labels.csv \
+                    --asdb ../asn-sources/asdb.csv \
+                    --output ../data-branch/data/asn.csv.gz
+
             - name: Commit updated data
               working-directory: data-branch
               run: |
                   git config user.name "github-actions[bot]"
                   git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-                  git add data/vpn.csv.gz
-                  git diff --cached --quiet || git commit -m "chore: update VPN data"
+                  git add data/vpn.csv.gz data/asn.csv.gz
+                  git diff --cached --quiet || git commit -m "chore: update data"
                   git push origin data
