@@ -8,6 +8,7 @@ const ASN_TYPE_TERMS: Record<AsnType, string[]> = {
         'arubacloud',
         'azure',
         'choopa',
+        'cloudflare',
         'contabo',
         'digitalocean',
         'equinix',
@@ -101,5 +102,5 @@ export function getAsnType(holder: string | null | undefined): AsnType {
         }
     }
 
-    return 'Business';
+    return 'Hosting';
 }

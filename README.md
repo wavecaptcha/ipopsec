@@ -11,16 +11,8 @@ npm run verify
 
 Build output is written to `dist/`.
 
-## Publishing
+## Credits:
 
-Review the package contents without publishing:
+### Name (IpOpsec):
 
-```sh
-npm run package:dry-run
-```
-
-Publish a verified package to npm:
-
-```sh
-npm run package:publish
-```
+Name was suggested by kz (622795838032314388)
