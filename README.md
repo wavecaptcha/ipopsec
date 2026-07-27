@@ -1,6 +1,12 @@
-# ipopsec
+# IP Opsec
 
-IP information and reputation utilities for TypeScript and JavaScript projects.
+Lightweight IP information and reputation utilities for TypeScript and JavaScript.
+
+## Installation
+
+```sh
+npm install
+```
 
 ## Development
 
@@ -9,10 +15,10 @@ npm install
 npm run verify
 ```
 
-Build output is written to `dist/`.
+Compiled files are written to `dist/`.
 
-## Credits:
+## Credits
 
-### Name (IpOpsec):
+### Project Name
 
-Name was suggested by kz (622795838032314388)
+The name **IP Opsec** was suggested by kz ([622795838032314388](https://discord.com/users/622795838032314388)).
