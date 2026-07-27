@@ -546,12 +546,14 @@ async function main(): Promise<void> {
     const csv = [
         'asn,type,confidence,source',
         ...rows.map((row) => {
+            const reviewedType = reviewed.get(row.asn);
+            if (reviewedType) {
+                return `${row.asn},${reviewedType},1,reviewed`;
+            }
             const result = predict(weights, row, means, deviations);
-            if (!reviewed.has(row.asn)) {
-                const asdbType = asdb.get(row.asn);
-                if (asdbType) {
-                    return `${row.asn},${asdbType},1,asdb`;
-                }
+            const asdbType = asdb.get(row.asn);
+            if (asdbType) {
+                return `${row.asn},${asdbType},1,asdb`;
             }
             const type = result.confidence >= 0.8 ? result.type : 'Unknown';
             return `${row.asn},${type},${result.confidence.toFixed(6)},ml`;
