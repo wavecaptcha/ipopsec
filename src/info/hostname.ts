@@ -18,14 +18,12 @@ function getReverseDnsName(ip: string): string {
 
     if (version === 'ipv6') {
         const [left = '', right = ''] = ip.split('::');
+        const leftParts = left ? left.split(':') : [];
+        const rightParts = right ? right.split(':') : [];
         const parts = [
-            ...(left ? left.split(':') : []),
-            ...Array(
-                8 -
-                    (left ? left.split(':').length : 0) -
-                    (right ? right.split(':').length : 0),
-            ).fill('0'),
-            ...(right ? right.split(':') : []),
+            ...leftParts,
+            ...Array(8 - leftParts.length - rightParts.length).fill('0'),
+            ...rightParts,
         ];
 
         return `${parts
